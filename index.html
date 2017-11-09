@@ -8,6 +8,8 @@
     
 <input id="inputImage" type="text"><button onclick="imageEmotion()">Test</button>
 <img id="sourceImage">
+<div id="emotions"></div>
+<div id="facePosition"></div>
 
 <style>
     #sourceImage {
@@ -16,6 +18,15 @@
         display:block;
     }
     
+    #emotions {
+        position:absolute;
+        left:400px;
+        top:0;
+        width:300px;
+        max-width:300px;
+        background:#FAFAFA;
+        border:1px solid #DDD;
+    }    
 </style>
 
 <script type="text/javascript">
@@ -25,7 +36,16 @@
         };
         var sourceImageUrl = document.getElementById("inputImage").value;
         document.querySelector("#sourceImage").src = sourceImageUrl;
-
+        emotions = document.getElementById("emotions");
+        position = document.getElementById("facePosition");
+        function showEmotion(scores) {
+            console.log(scores);
+            emotions.innerHTML = JSON.stringify(scores, '\t');
+        }
+        function showFace(faceRectangle) {
+            console.log(faceRectangle);
+            position.innerHTML = JSON.stringify(faceRectangle);
+        }
         $.ajax({
             url: "https://westus.api.cognitive.microsoft.com/emotion/v1.0/recognize?" + $.param(params),
             beforeSend: function(xhrObj){
@@ -36,10 +56,12 @@
             data: '{"url": ' + '"' + sourceImageUrl + '"}',
         })
         .done(function(data) {
-            alert("success");
+            data = JSON.parse(JSON.stringify(data[0]));
+            showEmotion(data.scores);
+            showFace(data.faceRectangle);
         })
         .fail(function() {
-            alert("error");
+            alert("No face visible");
         });
     };
 </script>
